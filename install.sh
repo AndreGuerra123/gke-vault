@@ -11,7 +11,7 @@ gcloud services enable cloudapis.googleapis.com cloudkms.googleapis.com containe
 
 # Create Keyring and Key
 gcloud kms keyrings create vault --location global --project ${PROJECT_ID}
-gcloud kms keys create vault-init --location global --keyring vault --purpose encryption -project ${PROJECT_ID}
+gcloud kms keys create vault-init --location global --keyring vault --purpose encryption --project ${PROJECT_ID}
 
 # Create the Storage Bucket
 gsutil mb -p ${PROJECT_ID} gs://${GCS_BUCKET_NAME}
@@ -43,23 +43,6 @@ kubectl apply -f vault.yaml
 #Automatic initialization
 kubectl logs vault-0 -c vault-init
 
-#Expose
-cat > vault-load-balancer.yaml <<EOF
-apiVersion: v1
-kind: Service
-metadata:
-  name: vault-load-balancer
-spec:
-  type: LoadBalancer
-  loadBalancerIP: ${VAULT_LOAD_BALANCER_IP}
-  ports:
-    - name: http
-      port: 8200
-    - name: server
-      port: 8201
-  selector:
-    app: vault
-EOF
-
+#Expose Load Balancer
 kubectl apply -f vault-load-balancer.yaml
 export VAULT_TOKEN=$(gsutil cat gs://${GCS_BUCKET_NAME}/root-token.enc | base64 --decode | gcloud kms decrypt --project ${PROJECT_ID} --location global --keyring vault --key vault-init --ciphertext-file - --plaintext-file - )
