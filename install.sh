@@ -24,7 +24,7 @@ gsutil iam ch serviceAccount:vault-server@${PROJECT_ID}.iam.gserviceaccount.com:
 gcloud kms keys add-iam-policy-binding vault-init --location global --keyring vault --member serviceAccount:vault-server@${PROJECT_ID}.iam.gserviceaccount.com --role roles/cloudkms.cryptoKeyEncrypterDecrypter --project ${PROJECT_ID}
 
 # Starting Kubernetes cluster
-gcloud container clusters create vault --enable-autorepair --cluster-version 1.11.2-gke.9 --machine-type n1-standard-2 --service-account vault-server@${PROJECT_ID}.iam.gserviceaccount.com --num-nodes 3 --zone ${COMPUTE_ZONE} --project ${PROJECT_ID}
+gcloud container clusters create vault --enable-autorepair --machine-type n1-standard-2 --service-account vault-server@${PROJECT_ID}.iam.gserviceaccount.com --num-nodes 3 --zone ${COMPUTE_ZONE} --project ${PROJECT_ID}
 
 # Provisioning the IP Address
 gcloud compute addresses create vault --region ${COMPUTE_REGION} --project ${PROJECT_ID}
