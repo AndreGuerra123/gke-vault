@@ -44,5 +44,21 @@ kubectl apply -f vault.yaml
 kubectl logs vault-0 -c vault-init
 
 #Expose Load Balancer
+cat > vault-load-balancer.yaml <<EOF
+apiVersion: v1
+kind: Service
+metadata:
+  name: vault-load-balancer
+spec:
+  type: LoadBalancer
+  loadBalancerIP: ${VAULT_LOAD_BALANCER_IP}
+  ports:
+    - name: http
+      port: 8200
+    - name: server
+      port: 8201
+  selector:
+    app: vault
+EOF
 kubectl apply -f vault-load-balancer.yaml
 export VAULT_TOKEN=$(gsutil cat gs://${GCS_BUCKET_NAME}/root-token.enc | base64 --decode | gcloud kms decrypt --project ${PROJECT_ID} --location global --keyring vault --key vault-init --ciphertext-file - --plaintext-file - )
